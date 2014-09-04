@@ -1,0 +1,21 @@
+{
+  "mainFile": "rkTwitter.py", 
+  "venv": "", 
+  "name": "rkTwitter", 
+  "license": "", 
+  "url": "", 
+  "pythonPath": "python", 
+  "programParams": "-v", 
+  "supported-extensions": [
+    ".py", 
+    ".html", 
+    ".jpg", 
+    ".png", 
+    ".ui", 
+    ".css", 
+    ".json", 
+    ".ini"
+  ], 
+  "project-type": "", 
+  "description": ""
+}

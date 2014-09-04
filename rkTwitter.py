@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import time
 import sys
+from threading import Timer
+import RPi.GPIO as GPIO
 from birdy.twitter import UserClient
 
 # These are the secret keys received from the Twitter development center
@@ -12,7 +14,7 @@ twitterKeysFileName = 'twitter.txt'
 # Display detailed information when set to true
 verbose = False
 
-# The lastTweed is the ID of the last processed tweet. It's initialized to 1 
+# The lastTweed is the ID of the last processed tweet. It's initialized to 1
 # for the first call since the API returns an error with since_id=0
 lastTweet = 1
 
@@ -24,10 +26,16 @@ fileName = 'id.txt'
 # to 15 calls per block of 15 minutes. The extra 1 is to play safe.
 sleepDelay = 61
 
+IO_ACTION1 = 18
+IO_ACTION2 = 23
+
+DELAY_ACTION1 = 5
+DELAY_ACTION2 = 10
+
 # Create the client using the keys found in the twitter.txt file
 def createClient():
     global client
-    file = open(twitterKeysFileName, 'r')   
+    file = open(twitterKeysFileName, 'r')
     k1 =  file.readline().replace("\n", "")
     k2 =  file.readline().replace("\n", "")
     k3 =  file.readline().replace("\n", "")
@@ -91,7 +99,7 @@ def loadLastTweetId():
         file = open(fileName,'r')
         lastTweet = long(file.read())
         file.close()
-        printInfo('Last tweet mention id found: ' + str(lastTweet))    
+        printInfo('Last tweet mention id found: ' + str(lastTweet))
     except:
         printInfo('Last tweet mention id not found. Will load all mentions.')
 
@@ -108,11 +116,26 @@ def processTweets(tweets):
 
     return
 
+def initGPIO():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18, GPIO.OUT)
+    GPIO.setup(23, GPIO.OUT)
+
 def action1(text):
     print('action1: ' + text)
+    GPIO.output(IO_ACTION1, True)
+    Timer(DELAY_ACTION1, action1Stop).start()
+
+def action1Stop():
+    GPIO.output(IO_ACTION1, False)
 
 def action2(text):
     print('action2: ' + text)
+    GPIO.output(IO_ACTION2, True)
+    Timer(DELAY_ACTION2, action2Stop).start()
+
+def action2Stop():
+    GPIO.output(IO_ACTION2, False)
 
 def action3(text):
     print('action3: ' + text)
@@ -121,6 +144,7 @@ def action3(text):
 actions = {'#action1':action1, '#action2':action2, '#action3':action3}
 
 createClient()
+initGPIO()
 
 # Read the command line arguments
 processArgv()
