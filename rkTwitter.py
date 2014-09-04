@@ -1,11 +1,12 @@
 #!/usr/bin/python
 import time
 import sys
+import atexit
 from threading import Timer
 import RPi.GPIO as GPIO
 from birdy.twitter import UserClient
 
-# These are the secret keys received from the Twitter development center
+# The client is instantiated using the keys provided by the Twitter API
 client = None
 
 # The name of the file storing the development keys ...
@@ -116,6 +117,12 @@ def processTweets(tweets):
 
     return
 
+def clearGPIO():
+    GPIO.cleanup()
+    print('Bye!')
+
+atexit.register(clearGPIO)
+    
 def initGPIO():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(18, GPIO.OUT)
@@ -160,5 +167,4 @@ while True:
 
     # Wait before to call the API again to avoid being blocked
     time.sleep(sleepDelay)
-
 
